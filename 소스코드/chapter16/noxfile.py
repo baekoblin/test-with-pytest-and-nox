@@ -1,32 +1,29 @@
 import nox
-import subprocess
-import os
-
-def install_python_version(version):
-    """Install Python version using pyenv if not already installed."""
-    result = subprocess.run(["pyenv", "versions", "--bare"], capture_output=True, text=True)
-    installed_versions = result.stdout.split()
-    if version not in installed_versions:
-        subprocess.run(["pyenv", "install", version])
 
 @nox.session
-def bootstrap(session):
-    """Bootstrap Python versions using pyenv."""
-    versions = ["3.7.9", "3.8.6", "3.9.1"]
-    for version in versions:
-        install_python_version(version)
+def type_check(session):
+    session.install('mypy')
+    session.run('mypy','test_nox.py')
 
-@nox.session(python=["3.7.9", "3.8.6", "3.9.1"])
-def tests(session):
-    session.install('pytest')
-    session.run('pytest')
 
 @nox.session
-def lint(session):
-    session.install('flake8')
-    session.run('flake8', 'my_project')
+def external_command(session):
+    session.run('echo', 'Hello, world!', external=True)
+
 
 @nox.session
-def docs(session):
-    session.install('sphinx')
-    session.run('sphinx-build', 'docs', 'docs/_build')
+def silent_command(session):
+    session.run('echo', 'This will not be shown', silent=True)
+
+
+
+@nox.session
+def log_output(session):
+    session.log('Logging this message')
+    session.run('echo', 'This will be logged')
+
+
+@nox.session
+def install_system_dependencies(session):
+    session.run_always('apt-get', 'update', external=True)
+    session.run_always('apt-get', 'install', '-y', 'some-package', external=True)
